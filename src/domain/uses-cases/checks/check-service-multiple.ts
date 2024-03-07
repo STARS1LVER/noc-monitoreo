@@ -9,16 +9,23 @@ type SuccesCallback = (() => void | undefined );
 type ErrorCallback = (( error: string ) => void | undefined );
 
 
-export class CheckService implements CheckServiceUseCase {
+export class CheckMultipleService implements CheckServiceUseCase {
 
     public origin: string = 'check-service.ts'
 
     constructor(
-         private readonly logRepository: LogRepository,
+         private readonly logRepository: LogRepository[],
          private readonly succesCallback: SuccesCallback,
          private readonly errorCallback: ErrorCallback
     ) {}
     
+
+    private callLogs( log: LogEntity ){
+        this.logRepository.forEach( logRepository => {
+            logRepository.saveLog(log)
+        } )
+    }
+
     async execute( url: string  ): Promise<boolean>  {  
         
         try {
@@ -32,7 +39,9 @@ export class CheckService implements CheckServiceUseCase {
                 level: LogSeverityLevel.low, 
                 origin:this.origin 
             })
-            this.logRepository.saveLog( log )
+            
+            this.callLogs( log )
+
             this.succesCallback() && this.succesCallback();
             return true
         } catch (error) {
@@ -42,7 +51,9 @@ export class CheckService implements CheckServiceUseCase {
                 level:LogSeverityLevel.low, 
                 origin:this.origin  
             } )
-            this.logRepository.saveLog( log )
+            
+            this.callLogs( log )
+            
             this.errorCallback(`${errorMessage}`) && this.errorCallback(`${errorMessage}`)
             return false
         }

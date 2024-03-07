@@ -1,2 +1,13 @@
 node_modules
 dist/
+
+# no le damos seguimiento a este directorio
+logs/
+
+
+.env
+
+mongo/
+
+
+postgres/
